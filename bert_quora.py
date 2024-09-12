@@ -131,7 +131,7 @@ def main(train_file,
         checkpoint = torch.load(checkpoint)
         start_epoch = checkpoint["epoch"] + 1
         best_score = checkpoint["best_score"]
-
+        print('aaaaaaaaaaaaaaaaaaaa1')
         print("\t* Training will continue on existing model from epoch {}..."
               .format(start_epoch))
 
@@ -140,19 +140,20 @@ def main(train_file,
         epochs_count = checkpoint["epochs_count"]
         train_losses = checkpoint["train_losses"]
         valid_losses = checkpoint["valid_losses"]
-
+    print('aaaaaaaaaaaaaaaaaaaa2')
     # Compute loss and accuracy before starting (or resuming) training.
-    _, valid_loss, valid_accuracy = validate(model,
-                                             valid_dataloader,
-                                             criterion)
-    print("\t* Validation loss before training: {:.4f}, accuracy: {:.4f}%"
-          .format(valid_loss, (valid_accuracy*100)))
+    # _, valid_loss, valid_accuracy = validate(model,
+    #                                          valid_dataloader,
+    #                                          criterion)
+    # print("\t* Validation loss before training: {:.4f}, accuracy: {:.4f}%"
+    #       .format(valid_loss, (valid_accuracy*100)))
 
-    _, test_loss, test_accuracy = validate(model,
-                                             test_dataloader,
-                                             criterion)
-    print("\t* test loss before training: {:.4f}, accuracy: {:.4f}%"
-          .format(test_loss, (test_accuracy*100)))
+    # _, test_loss, test_accuracy = validate(model,
+    #                                          test_dataloader,
+    #                                          criterion)
+    # print("\t* test loss before training: {:.4f}, accuracy: {:.4f}%"
+    #       .format(test_loss, (test_accuracy*100)))
+    print('aaaaaaaaaaaaaaaaaaaa')
 
     # -------------------- Training epochs ------------------- #
     print("\n",
@@ -279,3 +280,4 @@ if __name__ == "__main__":
          config["patience"],
          config["max_gradient_norm"],
          args.checkpoint)
+

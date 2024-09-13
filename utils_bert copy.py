@@ -6,11 +6,8 @@ import torch
 import torch.nn as nn
 from tqdm import tqdm
 from mfae.utils import correct_predictions
-from transformers import BertTokenizer, BertModel
+from bert_serving.client import BertClient
 
-# Initialize BERT tokenizer and model
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-bert_model = BertModel.from_pretrained('bert-base-uncased')
 
 def train(model,
           dataloader,
@@ -47,21 +44,19 @@ def train(model,
     sub_len = 0
 
     print('aaaaaaaaaaaaaaaaaaaaaaaa')
+    bc = BertClient()
+    print('2222222222222222222222222')
     batch = dataloader
     tqdm_batch_iterator = tqdm(range(len(dataloader['labels'])))
     print('11111111111111111111111111')
     for batch_index in tqdm_batch_iterator:
         batch_start = time.time()
 
-        # Tokenize and encode premises and hypotheses using Hugging Face's BERT
-        premises_tokens = tokenizer(batch["premises"][batch_index], return_tensors="pt", padding=True, truncation=True)
-        hypotheses_tokens = tokenizer(batch["hypotheses"][batch_index], return_tensors="pt", padding=True, truncation=True)
-
+        # try:
         # Move input and output data to the GPU if it is used.
-        premises = bert_model(**premises_tokens).last_hidden_state.to(device)
-        hypotheses = bert_model(**hypotheses_tokens).last_hidden_state.to(device)
+        premises = torch.tensor(bc.encode(batch["premises"][batch_index])).to(device)
+        hypotheses = torch.tensor(bc.encode(batch["hypotheses"][batch_index])).to(device)
         labels = torch.tensor(batch["labels"][batch_index]).to(device)
-
         optimizer.zero_grad()
 
         logits, probs = model(premises, hypotheses)
@@ -78,9 +73,12 @@ def train(model,
                       .format(batch_time_avg/(batch_index+1),
                               running_loss/(batch_index+1))
         tqdm_batch_iterator.set_description(description)
+        # except:
+        #     sub_len += 1
+        #     print('encoding error!')
 
     epoch_time = time.time() - epoch_start
-    epoch_loss = running_loss / (len(dataloader['labels']) - sub_len)
+    epoch_loss = running_loss / (len(dataloader['labels']) -sub_len)
     epoch_accuracy = correct_preds / total_num
 
     return epoch_time, epoch_loss, epoch_accuracy
@@ -95,6 +93,8 @@ def validate(model, dataloader, criterion):
             computed.
         dataloader: A DataLoader object to iterate over the validation data.
         criterion: A loss criterion to use for computing the loss.
+        epoch: The number of the epoch for which validation is performed.
+        device: The device on which the model is located.
 
     Returns:
         epoch_time: The total time to compute the loss and accuracy on the
@@ -102,6 +102,7 @@ def validate(model, dataloader, criterion):
         epoch_loss: The loss computed on the entire validation set.
         epoch_accuracy: The accuracy computed on the entire validation set.
     """
+
     # Switch to evaluate mode.
     model.eval()
     device = model.device
@@ -112,19 +113,16 @@ def validate(model, dataloader, criterion):
     total_num = 0
     sub_len = 0
 
+    bc = BertClient()
     batch = dataloader
     print('aaaaaaaaaaaa3')
-    
     # Deactivate autograd for evaluation.
     with torch.no_grad():
         for batch_index in range(len(dataloader['labels'])):
-            # Tokenize and encode premises and hypotheses using Hugging Face's BERT
-            premises_tokens = tokenizer(batch["premises"][batch_index], return_tensors="pt", padding=True, truncation=True)
-            hypotheses_tokens = tokenizer(batch["hypotheses"][batch_index], return_tensors="pt", padding=True, truncation=True)
-
             # Move input and output data to the GPU if one is used.
-            premises = bert_model(**premises_tokens).last_hidden_state.to(device)
-            hypotheses = bert_model(**hypotheses_tokens).last_hidden_state.to(device)
+            # try:
+            premises = torch.tensor(bc.encode(batch["premises"][batch_index])).to(device)
+            hypotheses = torch.tensor(bc.encode(batch["hypotheses"][batch_index])).to(device)
             labels = torch.tensor(batch["labels"][batch_index]).to(device)
 
             logits, probs = model(premises, hypotheses)
@@ -133,6 +131,9 @@ def validate(model, dataloader, criterion):
             running_loss += loss.item()
             running_accuracy += correct_predictions(probs, labels)
             total_num += len(labels)
+            # except:
+            #     sub_len += 1
+            #     print('encoding error!')
 
     epoch_time = time.time() - epoch_start
     epoch_loss = running_loss / (len(dataloader['labels']) - sub_len)

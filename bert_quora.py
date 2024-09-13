@@ -140,7 +140,6 @@ def main(train_file,
         epochs_count = checkpoint["epochs_count"]
         train_losses = checkpoint["train_losses"]
         valid_losses = checkpoint["valid_losses"]
-    print('aaaaaaaaaaaaaaaaaaaa2')
     # Compute loss and accuracy before starting (or resuming) training.
     # _, valid_loss, valid_accuracy = validate(model,
     #                                          valid_dataloader,
@@ -153,7 +152,6 @@ def main(train_file,
     #                                          criterion)
     # print("\t* test loss before training: {:.4f}, accuracy: {:.4f}%"
     #       .format(test_loss, (test_accuracy*100)))
-    print('aaaaaaaaaaaaaaaaaaaa')
 
     # -------------------- Training epochs ------------------- #
     print("\n",
@@ -173,8 +171,8 @@ def main(train_file,
                                                        criterion,
                                                        epoch,
                                                        max_grad_norm)
-
         train_losses.append(epoch_loss)
+        print('aaaaaaaa2')
         print("-> Training time: {:.4f}s, loss = {:.4f}, accuracy: {:.4f}%"
               .format(epoch_time, epoch_loss, (epoch_accuracy*100)))
 

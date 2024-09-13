@@ -3,7 +3,7 @@ Train the ESIM model on the preprocessed SNLI dataset.
 """
 # Aurelien Coet, 2018.
 
-from utils_bert import train, validate
+from utils_bert_copy import train, validate
 from mfae.model_bert import ESIM
 # from mfae.model_bert_transformer import ESIM
 import torch.nn as nn

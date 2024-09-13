@@ -43,6 +43,12 @@ def train(model,
     correct_preds = 0
     total_num = 0
     sub_len = 0
+    batch = dataloader
+
+    print(type(batch["premises"]))
+    print(batch["premises"][0])
+    print(type(batch["hypotheses"]))
+    print(batch["hypotheses"][0])
 
     print('aaaaaaaaaaaaaaaaaaaaaaaa')
 
@@ -50,18 +56,18 @@ def train(model,
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
     model = BertModel.from_pretrained('bert-base-uncased').to(device)
 
-    print('2222222222222222222222222')
-    batch = dataloader
     tqdm_batch_iterator = tqdm(range(len(dataloader['labels'])))
-    print('11111111111111111111111111')
+
+    
 
     for batch_index in tqdm_batch_iterator:
         batch_start = time.time()
-
+        print('2222222222222222222222222')
         # Tokenize and encode premises and hypotheses
         premises = tokenizer(batch["premises"][batch_index], return_tensors="pt", padding=True, truncation=True).to(device)
         hypotheses = tokenizer(batch["hypotheses"][batch_index], return_tensors="pt", padding=True, truncation=True).to(device)
         
+        print(11111111111111111111111)
         # Move inputs to the device (GPU/CPU)
         premises = model(**premises).last_hidden_state
         hypotheses = model(**hypotheses).last_hidden_state
